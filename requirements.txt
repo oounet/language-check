@@ -1,4 +1,3 @@
 streamlit
 lingua-language-detector
-fastapi
 uvicorn
