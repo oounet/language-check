@@ -41,8 +41,7 @@ languages = [
     Language.VIETNAMESE,
     Language.INDONESIAN,
     Language.THAI,
-    Language.HEBREW,
-    Language.BRAZILIAN_PORTUGUESE,
+    Language.HEBREW
 ]
 
 detector = LanguageDetectorBuilder.from_languages(*languages).build()
