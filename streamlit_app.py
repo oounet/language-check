@@ -1,13 +1,6 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+import streamlit as st
 from lingua import Language, LanguageDetectorBuilder
 
-app = FastAPI(
-    title="Language Detection API",
-    version="1.0.0"
-)
-
-# 支持的语言
 languages = [
     Language.CHINESE,
     Language.ENGLISH,
@@ -16,49 +9,29 @@ languages = [
     Language.FRENCH,
     Language.GERMAN,
     Language.SPANISH,
-    Language.ITALIAN,
-    Language.PORTUGUESE,
-    Language.RUSSIAN,
 ]
 
-# 创建检测器
 detector = LanguageDetectorBuilder.from_languages(*languages).build()
 
+st.title("语言检测")
 
-class TextRequest(BaseModel):
-    text: str
+text = st.text_area("请输入文本")
 
+if st.button("检测语言"):
+    if not text.strip():
+        st.warning("请输入文本")
+    else:
+        language = detector.detect_language_of(text)
 
-@app.get("/")
-def root():
-    return {
-        "message": "Language Detection API is running"
-    }
+        if language:
+            confidence = detector.compute_language_confidence(
+                text,
+                language
+            )
 
-
-@app.post("/detect")
-def detect_language(request: TextRequest):
-    text = request.text.strip()
-
-    if not text:
-        return {
-            "language": None,
-            "confidence": 0,
-            "message": "text cannot be empty"
-        }
-
-    language = detector.detect_language_of(text)
-
-    if language is None:
-        return {
-            "language": None,
-            "confidence": 0
-        }
-
-    # Lingua 获取置信度
-    confidence = detector.compute_language_confidence(text, language)
-
-    return {
-        "language": language.name,
-        "confidence": round(confidence, 4)
-    }
+            st.success(
+                f"语言：{language.name}\n\n"
+                f"置信度：{confidence:.4f}"
+            )
+        else:
+            st.warning("无法识别语言")
