@@ -3,6 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from lingua import Language, LanguageDetectorBuilder
+from datetime import datetime
 
 app = FastAPI()
 
@@ -33,12 +34,32 @@ languages = [
     Language.ARABIC,
     Language.HINDI,
     Language.ITALIAN,
+    Language.TURKISH,
+    Language.DUTCH,
+    Language.POLISH,
+    Language.UKRAINIAN,
+    Language.VIETNAMESE,
+    Language.INDONESIAN,
+    Language.THAI,
+    Language.HEBREW,
+    Language.BRAZILIAN_PORTUGUESE,
 ]
 
 detector = LanguageDetectorBuilder.from_languages(*languages).build()
 
 class TextRequest(BaseModel):
     text: str
+
+@app.get("/health")
+async def status_check():
+    return {
+        "code": 0,
+        "data": {
+            "status": "UP",
+            "time": datetime.utcnow().isoformat()
+        },
+        "message": "ok"
+    }
 
 @app.post("/detect")
 def detect_language(request: TextRequest, token: str = Depends(verify_token)):
