@@ -51,7 +51,7 @@ class TextRequest(BaseModel):
     text: str
 
 @app.get("/health")
-async def status_check():
+def status_check():
     return {
         "code": 0,
         "data": {
