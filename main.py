@@ -43,8 +43,8 @@ class TextRequest(BaseModel):
 @app.post("/detect")
 def detect_language(request: TextRequest, token: str = Depends(verify_token)):
     if not request.text or not request.text.strip():
-        return {"language": "unknown"}
+        return {"language": None}
     language = detector.detect_language_of(request.text)
     if language is None:
-        return {"language": "unknown"}
+        return {"language": None}
     return {"language": language.iso_code_639_1.name.lower()}
