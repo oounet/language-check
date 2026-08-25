@@ -2,10 +2,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from lingua import Language, LanguageDetectorBuilder
 
-app = FastAPI(title="Language Detection API")
+app = FastAPI()
 
-
-# 支持的语言
 languages = [
     Language.CHINESE,
     Language.ENGLISH,
@@ -16,33 +14,21 @@ languages = [
     Language.SPANISH,
 ]
 
-# 创建语言检测器
-detector = LanguageDetectorBuilder.from_languages(*languages).build()
-
+# 只加载需要的语言，并开启低精度模式进一步减内存（短文本准确率会下降一点）
+detector = (
+    LanguageDetectorBuilder.from_languages(*languages)
+    .with_low_accuracy_mode()   # 可选，显著降低内存
+    .build()
+)
 
 class TextRequest(BaseModel):
     text: str
 
-
-class LanguageResponse(BaseModel):
-    text: str
-    language: str
-    language_code: str
-
-
-@app.post("/detect", response_model=LanguageResponse)
+@app.post("/detect")
 def detect_language(request: TextRequest):
     language = detector.detect_language_of(request.text)
-
     if language is None:
-        return {
-            "text": request.text,
-            "language": "UNKNOWN",
-            "language_code": "unknown",
-        }
-
+        return {"language": "unknown"}
     return {
-        "text": request.text,
-        "language": language.name,
-        "language_code": language.iso_code_639_1.name.lower(),
+        "language": language.iso_code_639_1.name.lower()
     }
